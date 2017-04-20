@@ -1,5 +1,13 @@
 <?php
-$show_complete_tasks = rand(0, 1);
+$days = rand(0, 3);
+$task_deadline_ts = strtotime("+" . $days . " day"); // метка времени даты выполнения задачи
+$current_ts = time(); // текущая метка времени
+
+// запишите сюда дату выполнения задачи в формате дд.мм.гггг
+$date_deadline = null;
+
+// в эту переменную запишите кол-во дней до даты задачи
+$days_until_deadline = null;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -107,15 +115,12 @@ $show_complete_tasks = rand(0, 1);
                     </div>
 
                     <label class="checkbox">
-                        <input id="show-complete-tasks" class="checkbox__input visually-hidden" type="checkbox" <?= ($show_complete_tasks == 1 ? 'checked' : '') ?>>
+                        <input id="show-complete-tasks" class="checkbox__input visually-hidden" type="checkbox" checked>
                         <span class="checkbox__text">Показывать выполненные</span>
                     </label>
                 </div>
 
                 <table class="tasks">
-
-                    <!--показывать эту строку, если переменная равна единице-->
-                    <? if ($show_complete_tasks == 1): ?>
                     <tr class="tasks__item task task--completed">
                         <td class="task__select">
                             <label class="checkbox task__checkbox">
@@ -128,8 +133,8 @@ $show_complete_tasks = rand(0, 1);
                         <td class="task__controls">
                         </td>
                     </tr>
-                    <? endif; ?>
 
+                    <!--добавьте здесь класс "task--important" если эта задача просрочена-->
                     <tr class="tasks__item task">
                         <td class="task__select">
                             <label class="checkbox task__checkbox">
@@ -138,7 +143,9 @@ $show_complete_tasks = rand(0, 1);
                             </label>
                         </td>
 
-                        <td class="task__date">20.04.2017</td>
+                        <td class="task__date">
+                            <!--выведите здесь дату выполнения задачи-->
+                        </td>
 
                         <td class="task__controls">
                             <button class="expand-control" type="button" name="button">Выполнить первое задание</button>
@@ -158,8 +165,6 @@ $show_complete_tasks = rand(0, 1);
                             </ul>
                         </td>
                     </tr>
-
-
                 </table>
             </main>
         </div>
