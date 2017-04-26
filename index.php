@@ -91,12 +91,12 @@ $tasks = [
 
                 <nav class="main-navigation">
                     <ul class="main-navigation__list">
-                        <? foreach ($projects as $key => $project_name): ?>
+                        <?php foreach ($projects as $key => $project_name): ?>
                             <li class="main-navigation__list-item <?= ($key == 0 ? 'main-navigation__list-item--active' : ''); ?>">
                                 <a class="main-navigation__list-item-link" href="#"><?= $project_name; ?></a>
                                 <span class="main-navigation__list-item-count">0</span>
                             </li>
-                        <? endforeach; ?>
+                        <?php endforeach; ?>
                     </ul>
                 </nav>
 
@@ -142,15 +142,15 @@ $tasks = [
                 </div>
 
                 <table class="tasks">
-                    <? foreach ($tasks as $task): ?>
-                        <? $class_name_by_task_status = ''; ?>
+                    <?php foreach ($tasks as $task): ?>
+                        <?php $class_name_by_task_status = ''; ?>
 
-                        <? if ($task['is_done']): ?>
-                            <? $class_name_by_task_status = 'task--completed'; ?>
-                        <? elseif ($task['date_deadline']): ?>
-                            <? $days_until_deadline = floor(strtotime($task['date_deadline']) / 86400) - (floor($current_ts / 86400) + 1); ?>
-                            <? $class_name_by_task_status = ($days_until_deadline <= 0 ? 'task--important' : ''); ?>
-                        <? endif; ?>
+                        <?php if ($task['is_done']): ?>
+                            <?php $class_name_by_task_status = 'task--completed'; ?>
+                        <?php elseif ($task['date_deadline']): ?>
+                            <?php $days_until_deadline = floor(strtotime($task['date_deadline']) / 86400) - (floor($current_ts / 86400) + 1); ?>
+                            <?php $class_name_by_task_status = ($days_until_deadline <= 0 ? 'task--important' : ''); ?>
+                        <?php endif; ?>
 
                         <tr class="tasks__item task <?= $class_name_by_task_status; ?>">
                             <td class="task__select">
@@ -163,7 +163,7 @@ $tasks = [
                             <td class="task__date"><?= $task['date_deadline']; ?></td>
 
                             <td class="task__controls">
-                                <? if (!$task['is_done']): ?>
+                                <?php if (!$task['is_done']): ?>
                                     <button class="expand-control" type="button" name="button">Действия
                                     </button>
 
@@ -180,10 +180,10 @@ $tasks = [
                                             <a href="#">Дублировать</a>
                                         </li>
                                     </ul>
-                                <? endif; ?>
+                                <?php endif; ?>
                             </td>
                         </tr>
-                    <? endforeach; ?>
+                    <?php endforeach; ?>
                 </table>
             </main>
         </div>
