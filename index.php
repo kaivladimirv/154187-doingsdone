@@ -47,6 +47,23 @@ $tasks = [
         'is_done'       => false,
     ],
 ];
+
+function get_tasks_count_by_project_name(array $tasks, $project_name)
+{
+    if ($project_name == 'Все') {
+        return count($tasks);
+    }
+
+    $count = 0;
+    foreach ($tasks as $task) {
+        if ($task['project_name'] == $project_name) {
+            $count++;
+        }
+    }
+
+    return $count;
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -94,7 +111,7 @@ $tasks = [
                         <?php foreach ($projects as $key => $project_name): ?>
                             <li class="main-navigation__list-item <?= ($key == 0 ? 'main-navigation__list-item--active' : ''); ?>">
                                 <a class="main-navigation__list-item-link" href="#"><?= $project_name; ?></a>
-                                <span class="main-navigation__list-item-count">0</span>
+                                <span class="main-navigation__list-item-count"><?= get_tasks_count_by_project_name($tasks, $project_name); ?></span>
                             </li>
                         <?php endforeach; ?>
                     </ul>
