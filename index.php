@@ -50,8 +50,7 @@ $tasks = [
     ],
 ];
 
-function get_tasks_count_by_project_name(array $tasks, string $project_name)
-{
+$get_tasks_count_by_project_name = function (array $tasks, string $project_name) {
     if ($project_name == 'Все') {
         return count($tasks);
     }
@@ -85,9 +84,10 @@ function get_tasks_count_by_project_name(array $tasks, string $project_name)
         <?= include_template('templates/header.php'); ?>
 
         <?= include_template('templates/main.php', [
-            'projects'   => $projects,
-            'tasks'      => $tasks,
-            'current_ts' => $current_ts,
+            'projects'                        => $projects,
+            'tasks'                           => $tasks,
+            'current_ts'                      => $current_ts,
+            'get_tasks_count_by_project_name' => $get_tasks_count_by_project_name,
         ]); ?>
     </div>
 </div>
