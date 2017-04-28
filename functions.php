@@ -6,9 +6,9 @@ function include_template(string $path, array $vars = [])
         return '';
     }
 
-    $vars = xss_clean($vars);
-
-    extract($vars);
+    foreach ($vars as $var_name => $var_value) {
+        ${$var_name} = xss_clean($var_value);
+    }
 
     ob_start();
 
