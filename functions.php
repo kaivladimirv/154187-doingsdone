@@ -12,7 +12,7 @@ function include_template(string $path, array $vars = [])
 
     ob_start();
 
-    require $path;
+    include $path;
 
     $buffer = ob_get_contents();
 
