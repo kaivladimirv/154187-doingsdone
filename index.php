@@ -50,6 +50,22 @@ $tasks = [
     ],
 ];
 
+function get_tasks_count_by_project_name(array $tasks, string $project_name)
+{
+    if ($project_name == 'Все') {
+        return count($tasks);
+    }
+
+    $count = 0;
+    foreach ($tasks as $task) {
+        if ($task['project_name'] == $project_name) {
+            $count++;
+        }
+    }
+
+    return $count;
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
