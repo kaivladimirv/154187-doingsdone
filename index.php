@@ -50,6 +50,12 @@ $tasks = [
     ],
 ];
 
+$current_project_name = get_project_name_by_project_code($projects, get_current_project_code());
+if (!$current_project_name) {
+    header($_SERVER["SERVER_PROTOCOL"] . ' 404 Not Found');
+    exit;
+}
+
 $get_tasks_count_by_project_name = function (array $tasks, string $project_name) {
     if ($project_name == 'Все') {
         return count($tasks);
@@ -63,6 +69,26 @@ $get_tasks_count_by_project_name = function (array $tasks, string $project_name)
     }
 
     return $count;
+};
+
+$get_tasks_by_project_name = function (array $tasks, string $project_name) {
+    if ($project_name == 'Все') {
+        return $tasks;
+    }
+
+    return array_filter($tasks, function ($task) use ($project_name) {
+        return ($task['project_name'] == $project_name);
+    });
+};
+
+function get_current_project_code()
+{
+    return (isset($_GET['project']) ? $_GET['project'] : 0);
+}
+
+function get_project_name_by_project_code(array $projects, $project_code)
+{
+    return (isset($projects[$project_code]) ? $projects[$project_code] : '');
 }
 
 ?>
@@ -84,10 +110,12 @@ $get_tasks_count_by_project_name = function (array $tasks, string $project_name)
         <?= include_template('templates/header.php'); ?>
 
         <?= include_template('templates/main.php', [
+            'current_ts'                      => $current_ts,
             'projects'                        => $projects,
             'tasks'                           => $tasks,
-            'current_ts'                      => $current_ts,
+            'current_project_name'            => $current_project_name,
             'get_tasks_count_by_project_name' => $get_tasks_count_by_project_name,
+            'get_tasks_by_project_name'       => $get_tasks_by_project_name,
         ]); ?>
     </div>
 </div>
