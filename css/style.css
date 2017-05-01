@@ -383,39 +383,27 @@ a:focus {
   padding-bottom: 3px;
 }
 
-.radio-button-group {
+.tasks-switch {
   display: inline-flex;
   flex-wrap: nowrap;
 
   font-size: 13px;
 }
 
-.radio-button-group .radio-button:first-child .radio-button__text {
+.tasks-switch__item:first-child {
   border-top-left-radius: 3px;
   border-bottom-left-radius: 3px;
 }
 
-.radio-button-group .radio-button:last-child .radio-button__text {
+.tasks-switch__item:last-child {
   border-top-right-radius: 3px;
   border-bottom-right-radius: 3px;
 }
 
-.radio-button {
-  display: flex;
-}
-
-.radio-button__input:checked + .radio-button__text {
-  z-index: 1;
-
-  color: #31313a;
-
-  background-color: #d7dbe8;
-  border-color: #d7dbe8;
-}
-
-.radio-button__text {
+.tasks-switch__item {
   position: relative;
 
+  display: flex;
   margin: -1px 0 0 -1px;
   padding: 9px 19px;
 
@@ -427,11 +415,17 @@ a:focus {
   border: 1px solid #d7dbe8;
 }
 
-.radio-button__text:hover,
-.radio-button__text:focus {
-  z-index: 1;
-
+.tasks-switch__item--active {
   color: #31313a;
+
+  background-color: #d7dbe8;
+  border-color: #d7dbe8;
+}
+
+.tasks-switch__item:hover,
+.tasks-switch__item:focus {
+  color: #31313a;
+  text-decoration: none;
 }
 
 .checkbox {

@@ -4,10 +4,11 @@
 
         <nav class="main-navigation">
             <ul class="main-navigation__list">
-                <?php foreach ($projects as $key => $project_name): ?>
-                    <li class="main-navigation__list-item <?= ($key == 0 ? 'main-navigation__list-item--active' : ''); ?>">
-                        <a class="main-navigation__list-item-link" href="#"><?= $project_name; ?></a>
-                        <span class="main-navigation__list-item-count"><?= $get_tasks_count_by_project_name($tasks, $project_name); ?></span>
+                <?php foreach ($data['projects'] as $project_code => $project_name): ?>
+                    <li class="main-navigation__list-item <?= ($data['current_project_code'] == $project_code ? 'main-navigation__list-item--active' : ''); ?>">
+                        <a class="main-navigation__list-item-link"
+                           href="/index.php?project=<?= $project_code; ?>"><?= $project_name; ?></a>
+                        <span class="main-navigation__list-item-count"><?= $data['get_tasks_count_by_project_code']($data['tasks'], $project_code); ?></span>
                     </li>
                 <?php endforeach; ?>
             </ul>
@@ -26,27 +27,12 @@
         </form>
 
         <div class="tasks-controls">
-            <div class="radio-button-group">
-                <label class="radio-button">
-                    <input class="radio-button__input visually-hidden" type="radio" name="radio" checked="">
-                    <span class="radio-button__text">Все задачи</span>
-                </label>
-
-                <label class="radio-button">
-                    <input class="radio-button__input visually-hidden" type="radio" name="radio">
-                    <span class="radio-button__text">Повестка дня</span>
-                </label>
-
-                <label class="radio-button">
-                    <input class="radio-button__input visually-hidden" type="radio" name="radio">
-                    <span class="radio-button__text">Завтра</span>
-                </label>
-
-                <label class="radio-button">
-                    <input class="radio-button__input visually-hidden" type="radio" name="radio">
-                    <span class="radio-button__text">Просроченные</span>
-                </label>
-            </div>
+            <nav class="tasks-switch">
+                <a href="/" class="tasks-switch__item tasks-switch__item--active">Все задачи</a>
+                <a href="/" class="tasks-switch__item">Повестка дня</a>
+                <a href="/" class="tasks-switch__item">Завтра</a>
+                <a href="/" class="tasks-switch__item">Просроченные</a>
+            </nav>
 
             <label class="checkbox">
                 <input id="show-complete-tasks" class="checkbox__input visually-hidden" type="checkbox" checked>
@@ -55,13 +41,13 @@
         </div>
 
         <table class="tasks">
-            <?php foreach ($tasks as $task): ?>
+            <?php foreach ($data['get_tasks_by_project_code']($data['tasks'], $data['current_project_code']) as $task): ?>
                 <?php $class_name_by_task_status = ''; ?>
 
                 <?php if ($task['is_done']): ?>
                     <?php $class_name_by_task_status = 'task--completed'; ?>
                 <?php elseif ($task['date_deadline']): ?>
-                    <?php $days_until_deadline = floor(strtotime($task['date_deadline']) / 86400) - (floor($current_ts / 86400) + 1); ?>
+                    <?php $days_until_deadline = floor(strtotime($task['date_deadline']) / 86400) - (floor($data['current_ts'] / 86400) + 1); ?>
                     <?php $class_name_by_task_status = ($days_until_deadline <= 0 ? 'task--important' : ''); ?>
                 <?php endif; ?>
 

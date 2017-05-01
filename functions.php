@@ -1,14 +1,14 @@
 <?php
 
-function include_template(string $path, array $vars = [])
+function include_template(string $path, array $data = [])
 {
     if (!file_exists($path)) {
         return '';
     }
 
-    foreach ($vars as $var_name => $var_value) {
-        ${$var_name} = xss_clean($var_value);
-    }
+    $data = array_map(function ($value) {
+        return xss_clean($value);
+    }, $data);
 
     ob_start();
 
