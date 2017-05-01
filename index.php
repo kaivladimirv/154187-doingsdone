@@ -1,69 +1,77 @@
 <?php
 require_once 'functions.php';
 
+define('P_ALL', 0);
+define('P_INCOME', 1);
+define('P_LEARN', 2);
+define('P_WORK', 3);
+define('P_HOME', 4);
+define('P_AUTO', 5);
+
 $current_ts = time(); // текущая метка времени
 
 $projects = [
-    'Все',
-    'Входящие',
-    'Учеба',
-    'Работа',
-    'Домашние дела',
-    'Авто',
+    P_ALL    => 'Все',
+    P_INCOME => 'Входящие',
+    P_LEARN  => 'Учеба',
+    P_WORK   => 'Работа',
+    P_HOME   => 'Домашние дела',
+    P_AUTO   => 'Авто',
 ];
 $tasks = [
     [
         'name'          => 'Собеседование в IT компании',
         'date_deadline' => '01.06.2017',
-        'project_name'  => 'Работа',
+        'project_code'  => P_WORK,
         'is_done'       => false,
     ],
     [
         'name'          => 'Выполнить тестовое задание',
         'date_deadline' => '25.05.2017',
-        'project_name'  => 'Работа',
+        'project_code'  => P_WORK,
         'is_done'       => false,
     ],
     [
         'name'          => 'Сделать задание первого раздела',
         'date_deadline' => '21.04.2017',
-        'project_name'  => 'Учеба',
+        'project_code'  => P_LEARN,
         'is_done'       => true,
     ],
     [
         'name'          => 'Встреча с другом',
         'date_deadline' => '22.04.2017',
-        'project_name'  => 'Входящие',
+        'project_code'  => P_INCOME,
         'is_done'       => false,
     ],
     [
         'name'          => 'Купить корм для кота',
         'date_deadline' => '',
-        'project_name'  => 'Домашние дела',
+        'project_code'  => P_HOME,
         'is_done'       => false,
     ],
     [
         'name'          => 'Заказать пиццу',
         'date_deadline' => '',
+        'project_code'  => P_HOME,
         'project_name'  => 'Домашние дела',
         'is_done'       => false,
     ],
 ];
 
-$current_project_name = get_project_name_by_project_code($projects, get_current_project_code());
-if (!$current_project_name) {
+$current_project_code = get_current_project_code();
+if (!get_project_name_by_project_code($projects, $current_project_code)) {
     header($_SERVER["SERVER_PROTOCOL"] . ' 404 Not Found');
     exit;
 }
 
-$get_tasks_count_by_project_name = function (array $tasks, string $project_name) {
-    if ($project_name == 'Все') {
+$get_tasks_count_by_project_code = function (array $tasks, int $project_code) {
+    if ($project_code == P_ALL) {
         return count($tasks);
     }
 
     $count = 0;
     foreach ($tasks as $task) {
-        if ($task['project_name'] == $project_name) {
+        if ($task['project_code'] == $project_code) {
             $count++;
         }
     }
@@ -71,24 +79,24 @@ $get_tasks_count_by_project_name = function (array $tasks, string $project_name)
     return $count;
 };
 
-$get_tasks_by_project_name = function (array $tasks, string $project_name) {
-    if ($project_name == 'Все') {
+$get_tasks_by_project_code = function (array $tasks, int $project_code) {
+    if ($project_code == P_ALL) {
         return $tasks;
     }
 
-    return array_filter($tasks, function ($task) use ($project_name) {
-        return ($task['project_name'] == $project_name);
+    return array_filter($tasks, function ($task) use ($project_code) {
+        return ($task['project_code'] == $project_code);
     });
 };
 
 function get_current_project_code()
 {
-    return (isset($_GET['project']) ? $_GET['project'] : 0);
+    return (isset($_GET['project']) ? (int) $_GET['project'] : P_ALL);
 }
 
 function get_project_name_by_project_code(array $projects, $project_code)
 {
-    return (isset($projects[$project_code]) ? $projects[$project_code] : '');
+    return (isset($projects[$project_code]) ? $projects[$project_code] : null);
 }
 
 ?>
@@ -113,9 +121,9 @@ function get_project_name_by_project_code(array $projects, $project_code)
             'current_ts'                      => $current_ts,
             'projects'                        => $projects,
             'tasks'                           => $tasks,
-            'current_project_name'            => $current_project_name,
-            'get_tasks_count_by_project_name' => $get_tasks_count_by_project_name,
-            'get_tasks_by_project_name'       => $get_tasks_by_project_name,
+            'current_project_code'            => $current_project_code,
+            'get_tasks_count_by_project_code' => $get_tasks_count_by_project_code,
+            'get_tasks_by_project_code'       => $get_tasks_by_project_code,
         ]); ?>
     </div>
 </div>

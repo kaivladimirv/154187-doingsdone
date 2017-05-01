@@ -4,11 +4,11 @@
 
         <nav class="main-navigation">
             <ul class="main-navigation__list">
-                <?php foreach ($data['projects'] as $key => $project_name): ?>
-                    <li class="main-navigation__list-item <?= ($data['current_project_name'] == $project_name ? 'main-navigation__list-item--active' : ''); ?>">
+                <?php foreach ($data['projects'] as $project_code => $project_name): ?>
+                    <li class="main-navigation__list-item <?= ($data['current_project_code'] == $project_code ? 'main-navigation__list-item--active' : ''); ?>">
                         <a class="main-navigation__list-item-link"
-                           href="/index.php?project=<?= $key; ?>"><?= $project_name; ?></a>
-                        <span class="main-navigation__list-item-count"><?= $data['get_tasks_count_by_project_name']($data['tasks'], $project_name); ?></span>
+                           href="/index.php?project=<?= $project_code; ?>"><?= $project_name; ?></a>
+                        <span class="main-navigation__list-item-count"><?= $data['get_tasks_count_by_project_code']($data['tasks'], $project_code); ?></span>
                     </li>
                 <?php endforeach; ?>
             </ul>
@@ -41,7 +41,7 @@
         </div>
 
         <table class="tasks">
-            <?php foreach ($data['get_tasks_by_project_name']($data['tasks'], $data['current_project_name']) as $task): ?>
+            <?php foreach ($data['get_tasks_by_project_code']($data['tasks'], $data['current_project_code']) as $task): ?>
                 <?php $class_name_by_task_status = ''; ?>
 
                 <?php if ($task['is_done']): ?>
