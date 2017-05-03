@@ -93,8 +93,10 @@ $errors_in_new_task = [];
 if (is_request_for_add_task()) {
     $errors_in_new_task = validation_task();
     if (!$errors_in_new_task) {
-        $tasks = add_task($tasks, $projects);
-        upload_file();
+        $tasks = add_task($tasks);
+        if (!upload_file()) {
+            $errors_in_new_task['preview'] = 'Произошла ошибка при загрузке файла';
+        }
     }
 }
 
@@ -117,10 +119,10 @@ function is_request_for_open_add_task_form()
 
 function is_request_for_add_task()
 {
-    return (isset($_POST) and $_POST);
+    return isset($_POST['project']);
 }
 
-function add_task(array $tasks, array $projects)
+function add_task(array $tasks)
 {
     array_unshift($tasks, [
         'name'          => $_POST['name'],
@@ -134,7 +136,7 @@ function add_task(array $tasks, array $projects)
 
 function upload_file()
 {
-    if (!isset($_FILES['preview'])) {
+    if (!is_attached_file()) {
         return true;
     }
 
@@ -163,7 +165,7 @@ function validation_task()
         }
     }
 
-    if (isset($_FILES['preview']) and $_FILES['preview']['name']) {
+    if (is_attached_file()) {
         if ($_FILES['preview']['error'] != UPLOAD_ERR_OK) {
             $errors['preview'] = 'Произошла ошибка при загрузке файла';
         } elseif (!is_uploaded_file($_FILES['preview']['tmp_name'])) {
@@ -172,6 +174,11 @@ function validation_task()
     }
 
     return $errors;
+}
+
+function is_attached_file()
+{
+    return (isset($_FILES['preview']) and $_FILES['preview']['name']);
 }
 
 ?>
