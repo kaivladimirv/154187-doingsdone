@@ -89,6 +89,19 @@ $get_tasks_by_project_code = function (array $tasks, int $project_code) {
     });
 };
 
+$errors_in_new_task = [];
+if (is_request_for_add_task()) {
+    $errors_in_new_task = validation_task();
+    if (!$errors_in_new_task) {
+        $tasks = add_task($tasks);
+        if (!upload_file()) {
+            $errors_in_new_task['preview'] = 'Произошла ошибка при загрузке файла';
+        }
+    }
+}
+
+$open_add_task_form = (is_request_for_open_add_task_form() or $errors_in_new_task);
+
 function get_current_project_code()
 {
     return (isset($_GET['project']) ? (int) $_GET['project'] : P_ALL);
@@ -97,6 +110,75 @@ function get_current_project_code()
 function get_project_name_by_project_code(array $projects, $project_code)
 {
     return (isset($projects[$project_code]) ? $projects[$project_code] : null);
+}
+
+function is_request_for_open_add_task_form()
+{
+    return isset($_GET['add']);
+}
+
+function is_request_for_add_task()
+{
+    return isset($_POST['project']);
+}
+
+function add_task(array $tasks)
+{
+    array_unshift($tasks, [
+        'name'          => $_POST['name'],
+        'date_deadline' => $_POST['date'],
+        'project_code'  => $_POST['project'],
+        'is_done'       => false,
+    ]);
+
+    return $tasks;
+}
+
+function upload_file()
+{
+    if (!is_attached_file()) {
+        return true;
+    }
+
+    $upload_dir = __DIR__ . '/';
+    $upload_file = $upload_dir . basename($_FILES['preview']['name']);
+
+    return move_uploaded_file($_FILES['preview']['tmp_name'], $upload_file);
+}
+
+function validation_task()
+{
+    $errors = [];
+
+    if (!isset($_POST['name']) or !$_POST['name']) {
+        $errors['name'] = 'Не указано название задачи';
+    }
+    if (!isset($_POST['project']) or !$_POST['project']) {
+        $errors['project'] = 'Не указан проект';
+    }
+    if (!isset($_POST['date']) or !$_POST['date']) {
+        $errors['date'] = 'Не указана дата выполнения';
+    } else {
+        $partsDate = explode('.', $_POST['date']);
+        if ((count($partsDate) != 3) or !checkdate($partsDate[1], $partsDate[0], $partsDate[2])) {
+            $errors['date'] = 'Не корректно указана дата выполнения';
+        }
+    }
+
+    if (is_attached_file()) {
+        if ($_FILES['preview']['error'] != UPLOAD_ERR_OK) {
+            $errors['preview'] = 'Произошла ошибка при загрузке файла';
+        } elseif (!is_uploaded_file($_FILES['preview']['tmp_name'])) {
+            $errors['preview'] = 'Возможная атака с участием загрузки файла';
+        }
+    }
+
+    return $errors;
+}
+
+function is_attached_file()
+{
+    return (isset($_FILES['preview']) and $_FILES['preview']['name']);
 }
 
 ?>
@@ -110,7 +192,8 @@ function get_project_name_by_project_code(array $projects, $project_code)
     <link rel="stylesheet" href="css/style.css">
 </head>
 
-<body><!--class="overlay"-->
+<body class="<?= ($open_add_task_form ? 'overlay' : ''); ?>">
+<!--class="overlay"-->
 <h1 class="visually-hidden">Дела в порядке</h1>
 
 <div class="page-wrapper">
@@ -130,50 +213,14 @@ function get_project_name_by_project_code(array $projects, $project_code)
 
 <?= include_template('templates/footer.php'); ?>
 
-<div class="modal" hidden>
-    <button class="modal__close" type="button" name="button">Закрыть</button>
-
-    <h2 class="modal__heading">Добавление задачи</h2>
-
-    <form class="form" class="" action="index.html" method="post">
-        <div class="form__row">
-            <label class="form__label" for="name">Название <sup>*</sup></label>
-
-            <input class="form__input" type="text" name="name" id="name" value="" placeholder="Введите название">
-        </div>
-
-        <div class="form__row">
-            <label class="form__label" for="project">Проект <sup>*</sup></label>
-
-            <select class="form__input form__input--select" name="project" id="project">
-                <option value="">Входящие</option>
-            </select>
-        </div>
-
-        <div class="form__row">
-            <label class="form__label" for="date">Дата выполнения <sup>*</sup></label>
-
-            <input class="form__input form__input--date" type="text" name="date" id="date" value=""
-                   placeholder="Введите дату в формате ДД.ММ.ГГГГ">
-        </div>
-
-        <div class="form__row">
-            <label class="form__label" for="file">Файл</label>
-
-            <div class="form__input-file">
-                <input class="visually-hidden" type="file" name="preview" id="preview" value="">
-
-                <label class="button button--transparent" for="preview">
-                    <span>Выберите файл</span>
-                </label>
-            </div>
-        </div>
-
-        <div class="form__row form__row--controls">
-            <input class="button" type="submit" name="" value="Добавить">
-        </div>
-    </form>
-</div>
+<?php if ($open_add_task_form): ?>
+    <?= include_template('templates/task_addition_form.php', [
+        'P_ALL'    => P_ALL,
+        'projects' => $projects,
+        'fields'   => $_POST,
+        'errors'   => $errors_in_new_task,
+    ]); ?>
+<?php endif; ?>
 
 <script type="text/javascript" src="js/script.js"></script>
 </body>
