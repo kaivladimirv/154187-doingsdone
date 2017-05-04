@@ -15,3 +15,11 @@ document.body.addEventListener('click', hidePopups, true);
     item.nextElementSibling.classList.toggle('hidden');
   });
 });
+
+var $checkbox = document.getElementsByClassName('checkbox__input')[0];
+
+$checkbox.addEventListener('change', function(event) {
+  var is_checked = +event.target.checked;
+
+  window.location = '/index.php?show_completed=' + is_checked;
+});
