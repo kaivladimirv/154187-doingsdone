@@ -4,18 +4,22 @@
     </a>
 
     <div class="main-header__side">
-        <a class="main-header__side-item button button--plus" href="/index.php?add">Добавить задачу</a>
+        <?php if ($data['current_user']): ?>
+            <a class="main-header__side-item button button--plus" href="/index.php?add">Добавить задачу</a>
 
-        <div class="main-header__side-item user-menu">
-            <div class="user-menu__image">
-                <img src="img/user-pic.jpg" width="40" height="40" alt="Пользователь">
+            <div class="main-header__side-item user-menu">
+                <div class="user-menu__image">
+                    <img src="img/user-pic.jpg" width="40" height="40" alt="Пользователь">
+                </div>
+
+                <div class="user-menu__data">
+                    <p><?= ($data['current_user'] ? $data['current_user']['name'] : ''); ?></p>
+
+                    <a href="/logout.php">Выйти</a>
+                </div>
             </div>
-
-            <div class="user-menu__data">
-                <p>Константин</p>
-
-                <a href="#">Выйти</a>
-            </div>
-        </div>
+        <?php else: ?>
+            <a class="main-header__side-item button button--transparent" href="/index.php?login">Войти</a>
+        <?php endif; ?>
     </div>
 </header>
