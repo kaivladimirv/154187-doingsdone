@@ -92,16 +92,6 @@ $get_tasks_count_by_project_code = function (array $tasks, int $project_code) {
     return $count;
 };
 
-$get_tasks_by_project_code = function (array $tasks, int $project_code) {
-    if ($project_code == P_ALL) {
-        return $tasks;
-    }
-
-    return array_filter($tasks, function ($task) use ($project_code) {
-        return ($task['project_code'] == $project_code);
-    });
-};
-
 $errors_in_new_task = [];
 if (is_request_for_add_task()) {
     $errors_in_new_task = validation_task();
@@ -123,6 +113,38 @@ function get_current_project_code()
 function get_project_name_by_project_code(array $projects, $project_code)
 {
     return (isset($projects[$project_code]) ? $projects[$project_code] : null);
+}
+
+function get_tasks_by_project_code(array $tasks, int $project_code)
+{
+    if ($project_code == P_ALL) {
+        return $tasks;
+    }
+
+    return array_filter($tasks, function ($task) use ($project_code) {
+        return ($task['project_code'] == $project_code);
+    });
+}
+
+function formatter_tasks_for_display(array $tasks, int $current_ts)
+{
+    return array_map(function ($task) use ($current_ts) {
+        $task['class_names'] = [];
+
+        if ($task['is_done']) {
+            $task['class_names'][] = 'task--completed';
+        } elseif ($task['date_deadline']) {
+            $days_until_deadline = calc_days_until_task_deadline($task['date_deadline'], $current_ts);
+            $task['class_names'][] = ($days_until_deadline <= 0 ? 'task--important' : '');
+        }
+
+        return $task;
+    }, $tasks);
+}
+
+function calc_days_until_task_deadline(string $date_deadline, int $current_ts)
+{
+    return floor(strtotime($date_deadline) / 86400) - (floor($current_ts / 86400) + 1);
 }
 
 function is_request_for_open_add_task_form()
@@ -294,12 +316,11 @@ function get_user_by_email(array $users, string $email)
 
         <?php if ($current_user): ?>
             <?= include_template('templates/main.php', [
-                'current_ts'                      => $current_ts,
                 'projects'                        => $projects,
-                'tasks'                           => $tasks,
+                'all_tasks'                       => $tasks,
                 'current_project_code'            => $current_project_code,
                 'get_tasks_count_by_project_code' => $get_tasks_count_by_project_code,
-                'get_tasks_by_project_code'       => $get_tasks_by_project_code,
+                'tasks'                           => formatter_tasks_for_display(get_tasks_by_project_code($tasks, $current_project_code), $current_ts),
             ]); ?>
         <?php else: ?>
             <?= include_template('templates/guest.php'); ?>

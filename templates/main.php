@@ -8,7 +8,7 @@
                     <li class="main-navigation__list-item <?= ($data['current_project_code'] == $project_code ? 'main-navigation__list-item--active' : ''); ?>">
                         <a class="main-navigation__list-item-link"
                            href="/index.php?project=<?= $project_code; ?>"><?= $project_name; ?></a>
-                        <span class="main-navigation__list-item-count"><?= $data['get_tasks_count_by_project_code']($data['tasks'], $project_code); ?></span>
+                        <span class="main-navigation__list-item-count"><?= $data['get_tasks_count_by_project_code']($data['all_tasks'], $project_code); ?></span>
                     </li>
                 <?php endforeach; ?>
             </ul>
@@ -41,17 +41,8 @@
         </div>
 
         <table class="tasks">
-            <?php foreach ($data['get_tasks_by_project_code']($data['tasks'], $data['current_project_code']) as $task): ?>
-                <?php $class_name_by_task_status = ''; ?>
-
-                <?php if ($task['is_done']): ?>
-                    <?php $class_name_by_task_status = 'task--completed'; ?>
-                <?php elseif ($task['date_deadline']): ?>
-                    <?php $days_until_deadline = floor(strtotime($task['date_deadline']) / 86400) - (floor($data['current_ts'] / 86400) + 1); ?>
-                    <?php $class_name_by_task_status = ($days_until_deadline <= 0 ? 'task--important' : ''); ?>
-                <?php endif; ?>
-
-                <tr class="tasks__item task <?= $class_name_by_task_status; ?>">
+            <?php foreach ($data['tasks'] as $task): ?>
+                <tr class="tasks__item task <?= implode(' ', $task['class_names']); ?>">
                     <td class="task__select">
                         <label class="checkbox task__checkbox">
                             <input class="checkbox__input visually-hidden"
