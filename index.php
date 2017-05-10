@@ -328,7 +328,9 @@ function get_user_by_email(array $users, string $email)
     </div>
 </div>
 
-<?= include_template('templates/footer.php'); ?>
+<?= include_template('templates/footer.php', [
+    'current_user' => $current_user,
+]); ?>
 
 <?php if ($open_add_task_form): ?>
     <?= include_template('templates/task_addition_form.php', [
