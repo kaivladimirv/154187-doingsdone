@@ -14,6 +14,12 @@ if (!$current_user and is_request_login()) {
 
 $open_login_form = ((is_request_for_open_login_form() or $login_errors));
 
+if (is_request_for_show_completed_tasks()) {
+    set_show_completed_tasks();
+    header('Location: /');
+    exit;
+}
+
 define('P_ALL', 0);
 define('P_INCOME', 1);
 define('P_LEARN', 2);
@@ -126,6 +132,15 @@ function get_tasks_by_project_code(array $tasks, int $project_code)
     });
 }
 
+function get_active_tasks_by_project_code(array $tasks, int $project_code)
+{
+    $tasks_by_project = get_tasks_by_project_code($tasks, $project_code);
+
+    return array_filter($tasks_by_project, function ($task) {
+        return !$task['is_done'];
+    });
+}
+
 function formatter_tasks_for_display(array $tasks, int $current_ts)
 {
     return array_map(function ($task) use ($current_ts) {
@@ -165,6 +180,11 @@ function is_request_for_open_login_form()
 function is_request_login()
 {
     return (isset($_POST['email']) and isset($_POST['password']));
+}
+
+function is_request_for_show_completed_tasks()
+{
+    return isset($_GET['show_completed']);
 }
 
 function add_task(array $tasks)
@@ -294,6 +314,18 @@ function get_user_by_email(array $users, string $email)
     return [];
 }
 
+function is_show_completed_tasks()
+{
+    return (isset($_COOKIE['show_completed']) and ($_COOKIE['show_completed'] == 1));
+}
+
+function set_show_completed_tasks()
+{
+    $show_completed = intval($_GET['show_completed']);
+
+    setcookie('show_completed', $show_completed, strtotime('+30days'));
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -315,12 +347,14 @@ function get_user_by_email(array $users, string $email)
         ]); ?>
 
         <?php if ($current_user): ?>
+            <?php $tasks_by_project = (is_show_completed_tasks() ? get_tasks_by_project_code($tasks, $current_project_code) : get_active_tasks_by_project_code($tasks, $current_project_code)); ?>
             <?= include_template('templates/main.php', [
                 'projects'                        => $projects,
                 'all_tasks'                       => $tasks,
                 'current_project_code'            => $current_project_code,
                 'get_tasks_count_by_project_code' => $get_tasks_count_by_project_code,
-                'tasks'                           => formatter_tasks_for_display(get_tasks_by_project_code($tasks, $current_project_code), $current_ts),
+                'tasks'                           => formatter_tasks_for_display($tasks_by_project, $current_ts),
+                'is_show_completed_tasks'         => is_show_completed_tasks(),
             ]); ?>
         <?php else: ?>
             <?= include_template('templates/guest.php'); ?>
