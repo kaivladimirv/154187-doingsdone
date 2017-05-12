@@ -14,7 +14,7 @@ if (!$current_user and is_request_login()) {
 
 $open_login_form = ((is_request_for_open_login_form() or $login_errors));
 
-if (is_request_for_show_completed_tasks()) {
+if ($current_user and is_request_for_show_completed_tasks()) {
     set_show_completed_tasks();
     header('Location: /');
     exit;
