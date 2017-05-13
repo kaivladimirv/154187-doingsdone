@@ -1,5 +1,7 @@
-#Производит выборку всех проектов
-SELECT * FROM projects;
+#Производит выборку проектов по указанному пользователю
+SELECT DISTINCT projects.* FROM projects
+JOIN tasks on projects.code = tasks.project_code
+WHERE tasks.creator_code = 1;
 
 #Производит выборку всех задача указанного проекта
 SELECT * FROM tasks WHERE project_code = 2;
