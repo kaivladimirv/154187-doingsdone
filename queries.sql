@@ -19,7 +19,8 @@ VALUES ('Выполнить задание Пишем SQL-запросы', 6, 1,
 
 #Производит выборку всех задача завтрашнего дня
 SELECT * FROM tasks
-WHERE (date_deadline IS NOT NULL)
+WHERE (creator_code = 1)
+AND (date_deadline IS NOT NULL)
 AND (DATE(date_deadline) = ADDDATE(CURDATE(), 1));
 
 #Производит изменение названия указанной задачи
