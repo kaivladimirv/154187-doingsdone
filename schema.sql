@@ -20,7 +20,7 @@ CREATE TABLE tasks (
   project_code INTEGER NOT NULL,
   creator_code INTEGER NOT NULL,
   date_creation TIMESTAMP NOT NULL,
-  date_deadline DATE,
+  date_deadline TIMESTAMP,
   path_to_file VARCHAR(255),
   is_done BIT NOT NULL DEFAULT 0,
 
