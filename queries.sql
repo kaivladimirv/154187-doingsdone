@@ -4,7 +4,8 @@ JOIN tasks on projects.code = tasks.project_code
 WHERE tasks.creator_code = 1;
 
 #Производит выборку всех задача указанного проекта
-SELECT * FROM tasks WHERE project_code = 2;
+SELECT code, `name`, project_code, creator_code, date_creation, date_deadline, path_to_file, is_done
+FROM tasks WHERE project_code = 2;
 
 #Определяет указанную задачу как выполненную
 UPDATE tasks SET is_done = 1 WHERE code = 3;
