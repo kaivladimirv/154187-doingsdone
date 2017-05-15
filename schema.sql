@@ -2,7 +2,7 @@ CREATE TABLE users (
   code INTEGER AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(100) NOT NULL,
   email VARCHAR(100) NOT NULL,
-  password VARCHAR(50) NOT NULL,
+  password VARCHAR(100) NOT NULL,
   contacts TEXT,
   date_registration TIMESTAMP NOT NULL,
 
@@ -22,6 +22,7 @@ CREATE TABLE tasks (
   date_creation TIMESTAMP NOT NULL,
   date_deadline TIMESTAMP,
   path_to_file VARCHAR(255),
+  date_completion TIMESTAMP,
   is_done BIT NOT NULL DEFAULT 0,
 
   FOREIGN KEY (project_code) REFERENCES projects(code),
