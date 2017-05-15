@@ -1,3 +1,13 @@
+#Производим очистку таблиц
+DELETE FROM tasks;
+DELETE FROM users;
+DELETE FROM projects;
+
+#Производим сброс счётчиков
+ALTER TABLE projects AUTO_INCREMENT = 0;
+ALTER TABLE users AUTO_INCREMENT = 0;
+ALTER TABLE tasks AUTO_INCREMENT = 0;
+
 #Производит добавление проектов
 INSERT INTO projects (`name`)
 VALUES ('Входящие'), ('Учеба'), ('Работа'), ('Домашние дела'), ('Авто');
