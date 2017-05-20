@@ -103,6 +103,7 @@ function db_query($conn_id, string $sql, array $data = [])
  */
 function db_insert($conn_id, string $sql, array $data)
 {
+
     $stmt = db_get_prepare_stmt($conn_id, $sql, $data);
     if (!$stmt) {
         return false;
@@ -167,4 +168,32 @@ function create_placeholder_for_query(array $data)
     }, $data);
 
     return implode(', ', $data);
+}
+
+/**
+ * Создаёт placeholder-ы для запроса insert
+ *
+ * @param int $count Количество placeholder-ов
+ *
+ * @return string
+ */
+function create_placeholders_for_insert(int $count)
+{
+    return implode(', ', array_fill(0, $count, '?'));
+}
+
+/**
+ * Формирует список полей для запроса insert
+ *
+ * @param array $fields_names Список названий полей
+ *
+ * @return string
+ */
+function create_fields_for_insert(array $fields_names)
+{
+    return implode(', ', array_reduce($fields_names, function ($carry, $field_name) {
+        $carry[] = "`{$field_name}`";
+
+        return $carry;
+    }));
 }

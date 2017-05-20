@@ -4,11 +4,11 @@
 
         <nav class="main-navigation">
             <ul class="main-navigation__list">
-                <?php foreach ($data['projects'] as $project_code => $project_name): ?>
-                    <li class="main-navigation__list-item <?= ($data['current_project_code'] == $project_code ? 'main-navigation__list-item--active' : ''); ?>">
+                <?php foreach ($data['projects'] as $project): ?>
+                    <li class="main-navigation__list-item <?= ($data['current_project_code'] == $project['code'] ? 'main-navigation__list-item--active' : ''); ?>">
                         <a class="main-navigation__list-item-link"
-                           href="/index.php?project=<?= $project_code; ?>"><?= $project_name; ?></a>
-                        <span class="main-navigation__list-item-count"><?= $data['get_tasks_count_by_project_code']($data['all_tasks'], $project_code); ?></span>
+                           href="/index.php?project=<?= $project['code']; ?>"><?= $project['name']; ?></a>
+                        <span class="main-navigation__list-item-count"><?= $project['tasks_count']; ?></span>
                     </li>
                 <?php endforeach; ?>
             </ul>
@@ -60,7 +60,7 @@
 
                             <ul class="expand-list hidden">
                                 <li class="expand-list__item">
-                                    <a href="#">Выполнить</a>
+                                    <a href="/index.php?complete_task=<?= $task['code']; ?>">Выполнить</a>
                                 </li>
 
                                 <li class="expand-list__item">

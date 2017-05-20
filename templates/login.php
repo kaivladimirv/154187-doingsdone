@@ -1,9 +1,15 @@
 <div class="modal" <?= ($data['open_login_form'] ? '' : 'hidden'); ?>>
     <button class="modal__close" type="button" name="button">Закрыть</button>
 
-    <h2 class="modal__heading">Вход на сайт</h2>
+    <h2 class="modal__heading">
+        <?php if (isset($_GET['is_registered'])) : ?>
+            Теперь вы можете войти, используя свой email и пароль
+        <?php else: ?>
+            Вход на сайт
+        <?php endif; ?>
+    </h2>
 
-    <form class="form" action="/index.php" method="post">
+    <form class="form" action="/index.php?login" method="post">
         <div class="form__row">
             <label class="form__label" for="email">E-mail <sup>*</sup></label>
 

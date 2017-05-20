@@ -10,6 +10,6 @@
                 указывая сроки.</p>
         </div>
 
-        <a class="welcome__button button" href="#">Зарегистрироваться</a>
+        <a class="welcome__button button" href="/index.php?register_form">Зарегистрироваться</a>
     </section>
 </div>
