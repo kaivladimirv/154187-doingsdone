@@ -19,7 +19,7 @@
                 </div>
             </div>
         <?php else: ?>
-            <a class="main-header__side-item button button--transparent" href="/index.php?login">Войти</a>
+            <a class="main-header__side-item button button--transparent" href="/index.php?login_form">Войти</a>
         <?php endif; ?>
     </div>
 </header>

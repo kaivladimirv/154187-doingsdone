@@ -5,6 +5,10 @@
 
     <form enctype="multipart/form-data" class="form" action="/index.php" method="post">
         <div class="form__row">
+            <span class="form__error"><?= (isset($data['errors']['error']) ? $data['errors']['error'] : ''); ?></span>
+        </div>
+
+        <div class="form__row">
             <label class="form__label" for="name">Название <sup>*</sup></label>
 
             <input class="form__input <?= (isset($data['errors']['name']) ? 'form__input--error' : ''); ?>" type="text"
@@ -21,11 +25,9 @@
             <select class="form__input form__input--select <?= (isset($data['errors']['project']) ? 'form__input--error' : ''); ?>"
                     name="project" id="project">
                 <option value=""></option>
-                <?php foreach ($data['projects'] as $project_code => $project_name): ?>
-                    <?php if ($project_code != $data['P_ALL']): ?>
-                        <option value="<?= $project_code; ?>"
-                            <?= ((isset($data['fields']['project']) and $data['fields']['project'] == $project_code) ? 'selected' : ''); ?>><?= $project_name; ?></option>
-                    <?php endif; ?>
+                <?php foreach ($data['projects'] as $project): ?>
+                    <option value="<?= $project['code']; ?>"
+                        <?= ((isset($data['fields']['project']) and $data['fields']['project'] == $project['code']) ? 'selected' : ''); ?>><?= $project['name']; ?></option>
                 <?php endforeach; ?>
             </select>
 

@@ -1,19 +1,34 @@
 <?php
 require_once 'mysql_helper.php';
 require_once 'functions.php';
-require_once 'userdata.php';
 
+define('P_ALL', 0);
+
+$register_errors = [];
 $login_errors = [];
-$current_user = authentication($users);
+$current_user = authentication();
 
 if (!$current_user and is_request_login()) {
-    $login_errors = validation_login($users);
+    $login_errors = validation_login();
     if (!$login_errors) {
-        $current_user = create_session($users);
+        create_session();
+        header('Location: /');
+        exit;
+    }
+}
+
+if (!$current_user and is_request_register()) {
+    $register_errors = validation_register();
+    if (!$register_errors) {
+        if (add_user()) {
+            header('Location: /index.php?login_form=&is_registered');
+            exit;
+        }
     }
 }
 
 $open_login_form = ((is_request_for_open_login_form() or $login_errors));
+$open_register_form = (!$current_user and (is_request_for_open_register_form() or $register_errors));
 
 if ($current_user and is_request_for_show_completed_tasks()) {
     set_show_completed_tasks();
@@ -21,130 +36,159 @@ if ($current_user and is_request_for_show_completed_tasks()) {
     exit;
 }
 
-define('P_ALL', 0);
-define('P_INCOME', 1);
-define('P_LEARN', 2);
-define('P_WORK', 3);
-define('P_HOME', 4);
-define('P_AUTO', 5);
-
-$current_ts = time(); // текущая метка времени
-
-$projects = [
-    P_ALL    => 'Все',
-    P_INCOME => 'Входящие',
-    P_LEARN  => 'Учеба',
-    P_WORK   => 'Работа',
-    P_HOME   => 'Домашние дела',
-    P_AUTO   => 'Авто',
-];
-$tasks = [
-    [
-        'name'          => 'Собеседование в IT компании',
-        'date_deadline' => '01.06.2017',
-        'project_code'  => P_WORK,
-        'is_done'       => false,
-    ],
-    [
-        'name'          => 'Выполнить тестовое задание',
-        'date_deadline' => '25.05.2017',
-        'project_code'  => P_WORK,
-        'is_done'       => false,
-    ],
-    [
-        'name'          => 'Сделать задание первого раздела',
-        'date_deadline' => '21.04.2017',
-        'project_code'  => P_LEARN,
-        'is_done'       => true,
-    ],
-    [
-        'name'          => 'Встреча с другом',
-        'date_deadline' => '22.04.2017',
-        'project_code'  => P_INCOME,
-        'is_done'       => false,
-    ],
-    [
-        'name'          => 'Купить корм для кота',
-        'date_deadline' => '',
-        'project_code'  => P_HOME,
-        'is_done'       => false,
-    ],
-    [
-        'name'          => 'Заказать пиццу',
-        'date_deadline' => '',
-        'project_code'  => P_HOME,
-        'project_name'  => 'Домашние дела',
-        'is_done'       => false,
-    ],
-];
-
 $current_project_code = get_current_project_code();
-if (!get_project_name_by_project_code($projects, $current_project_code)) {
+if (!is_exists_project($current_project_code)) {
     header($_SERVER["SERVER_PROTOCOL"] . ' 404 Not Found');
     exit;
 }
-
-$get_tasks_count_by_project_code = function (array $tasks, int $project_code) {
-    if ($project_code == P_ALL) {
-        return count($tasks);
-    }
-
-    $count = 0;
-    foreach ($tasks as $task) {
-        if ($task['project_code'] == $project_code) {
-            $count++;
-        }
-    }
-
-    return $count;
-};
 
 $errors_in_new_task = [];
 if (is_request_for_add_task()) {
     $errors_in_new_task = validation_task();
     if (!$errors_in_new_task) {
-        $tasks = add_task($tasks);
-        if (!upload_file()) {
+        if ($task_code = add_task()) {
+            if (upload_file($task_code)) {
+                header('Location: /');
+                exit;
+            }
+
             $errors_in_new_task['preview'] = 'Произошла ошибка при загрузке файла';
+        } else {
+            $errors_in_new_task['error'] = 'Не удалось создать задачу!';
         }
     }
 }
 
 $open_add_task_form = (is_request_for_open_add_task_form() or $errors_in_new_task);
 
+if ($current_user and is_request_for_complete_task()) {
+    complete_task(get_complete_task_code());
+}
+
 function get_current_project_code()
 {
     return (isset($_GET['project']) ? (int) $_GET['project'] : P_ALL);
 }
 
-function get_project_name_by_project_code(array $projects, $project_code)
+function get_projects_by_user(int $user_code)
 {
-    return (isset($projects[$project_code]) ? $projects[$project_code] : null);
+    $conn_id = db_connection($database_name = 'doingsdone');
+
+    $sql = "SELECT DISTINCT projects.* FROM projects
+      JOIN tasks on projects.code = tasks.project_code
+      WHERE tasks.creator_code = ?;";
+
+    return db_query($conn_id, $sql, [$user_code]);
 }
 
-function get_tasks_by_project_code(array $tasks, int $project_code)
+function is_exists_project(int $project_code)
 {
     if ($project_code == P_ALL) {
-        return $tasks;
+        return true;
     }
 
-    return array_filter($tasks, function ($task) use ($project_code) {
-        return ($task['project_code'] == $project_code);
-    });
+    $conn_id = db_connection($database_name = 'doingsdone');
+
+    $project = db_query($conn_id, "SELECT * FROM projects WHERE (code = ?);", [$project_code]);
+
+    return (is_array($project) and $project);
 }
 
-function get_active_tasks_by_project_code(array $tasks, int $project_code)
+function formatter_projects_for_display(int $user_code, array $projects)
 {
-    $tasks_by_project = get_tasks_by_project_code($tasks, $project_code);
+    array_unshift($projects, [
+        'code' => P_ALL,
+        'name' => 'Все',
+    ]);
 
-    return array_filter($tasks_by_project, function ($task) {
-        return !$task['is_done'];
-    });
+    $projects = array_map(function ($project) use ($user_code) {
+        $project['tasks_count'] = get_user_tasks_count_by_project($user_code, $project['code']);
+
+        return $project;
+    }, $projects);
+
+    return $projects;
 }
 
-function formatter_tasks_for_display(array $tasks, int $current_ts)
+function get_user_tasks_by_project(int $user_code, int $project_code)
 {
+    $where_placeholder = [];
+    $where_data = [];
+    set_where__tasks_by_user_code($where_placeholder, $where_data, $user_code);
+    set_where__tasks_by_project_code($where_placeholder, $where_data, $project_code);
+
+    return get_tasks_by_where($where_placeholder, $where_data);
+}
+
+function get_active_user_tasks_by_project(int $user_code, int $project_code)
+{
+    $where_placeholder = [];
+    $where_data = [];
+
+    set_where__tasks_by_user_code($where_placeholder, $where_data, $user_code);
+    set_where__active_tasks($where_placeholder, $where_data);
+    set_where__tasks_by_project_code($where_placeholder, $where_data, $project_code);
+
+    return get_tasks_by_where($where_placeholder, $where_data);
+}
+
+function get_tasks_by_where(array $where_placeholder = [], array $where_data = [])
+{
+    $where_placeholder = ($where_placeholder ? 'WHERE ' . implode(' AND ', $where_placeholder) : '');
+
+    $conn_id = db_connection($database_name = 'doingsdone');
+
+    return db_query($conn_id, "SELECT * FROM tasks {$where_placeholder};", $where_data);
+}
+
+function get_user_tasks_count_by_project(int $user_code, int $project_code)
+{
+    $where_placeholder = [];
+    $where_data = [];
+    set_where__tasks_by_user_code($where_placeholder, $where_data, $user_code);
+    set_where__tasks_by_project_code($where_placeholder, $where_data, $project_code);
+
+    return get_tasks_count_by_where($where_placeholder, $where_data);
+}
+
+function get_tasks_count_by_where(array $where_placeholder = [], array $where_data = [])
+{
+    $where_placeholder = ($where_placeholder ? 'WHERE ' . implode(' AND ', $where_placeholder) : '');
+
+    $conn_id = db_connection($database_name = 'doingsdone');
+
+    $data = db_query($conn_id, "SELECT COUNT(*) AS tasks_count FROM tasks {$where_placeholder};", $where_data);
+
+    return ($data ? $data[0]['tasks_count'] : 0);
+}
+
+function set_where__tasks_by_user_code(array &$where_placeholder, array &$where_data, int $user_code)
+{
+    $where_placeholder[] = '(creator_code = ?)';
+    $where_data[] = $user_code;
+}
+
+function set_where__tasks_by_project_code(array &$where_placeholder, array &$where_data, int $project_code)
+{
+    if ($project_code != P_ALL) {
+        $where_placeholder[] = '(project_code = ?)';
+        $where_data[] = $project_code;
+    }
+}
+
+function set_where__active_tasks(array &$where_placeholder, array &$where_data)
+{
+    $where_placeholder[] = '(is_done = ?)';
+    $where_data[] = 0;
+}
+
+function formatter_tasks_for_display(array $tasks)
+{
+    $current_ts = time(); // текущая метка времени
+
     return array_map(function ($task) use ($current_ts) {
+        $task['date_deadline'] = ($task['date_deadline'] ? date('d.m.Y', strtotime($task['date_deadline'])) : '');
+
         $task['class_names'] = [];
 
         if ($task['is_done']) {
@@ -175,12 +219,22 @@ function is_request_for_add_task()
 
 function is_request_for_open_login_form()
 {
-    return isset($_GET['login']);
+    return isset($_GET['login_form']);
 }
 
 function is_request_login()
 {
-    return (isset($_POST['email']) and isset($_POST['password']));
+    return isset($_GET['login']);
+}
+
+function is_request_for_open_register_form()
+{
+    return isset($_GET['register_form']);
+}
+
+function is_request_register()
+{
+    return isset($_GET['register']);
 }
 
 function is_request_for_show_completed_tasks()
@@ -188,19 +242,53 @@ function is_request_for_show_completed_tasks()
     return isset($_GET['show_completed']);
 }
 
-function add_task(array $tasks)
+function is_request_for_complete_task()
 {
-    array_unshift($tasks, [
-        'name'          => $_POST['name'],
-        'date_deadline' => $_POST['date'],
-        'project_code'  => $_POST['project'],
-        'is_done'       => false,
-    ]);
-
-    return $tasks;
+    return (isset($_GET['complete_task']) and is_numeric($_GET['complete_task']));
 }
 
-function upload_file()
+function get_complete_task_code()
+{
+    return (int) $_GET['complete_task'];
+}
+
+function complete_task(int $task_code)
+{
+    $data = [
+        'is_done'         => 1,
+        'date_completion' => date('Y-m-d H:i:s', time()),
+    ];
+    $where = ['code' => $task_code];
+
+    $conn_id = db_connection($database_name = 'doingsdone');
+
+    return db_update($conn_id, 'tasks', $data, $where);
+}
+
+function add_task()
+{
+    $data = [
+        'name'          => $_POST['name'],
+        'project_code'  => $_POST['project'],
+        'creator_code'  => 1,
+        'date_creation' => date('Y-m-d H:i:s', time()),
+        'date_deadline' => date('Y-m-d H:i:s', strtotime($_POST['date'])),
+    ];
+
+    $fields = implode(', ', array_reduce(array_keys($data), function ($carry, $field_name) {
+        $carry[] = "`{$field_name}`";
+
+        return $carry;
+    }));
+
+    $placeholders = implode(', ', array_fill(0, count($data), '?'));
+
+    $conn_id = db_connection($database_name = 'doingsdone');
+
+    return db_insert($conn_id, "INSERT INTO tasks ({$fields}) VALUES ({$placeholders});", $data);
+}
+
+function upload_file(int $task_code)
 {
     if (!is_attached_file()) {
         return true;
@@ -209,7 +297,17 @@ function upload_file()
     $upload_dir = __DIR__ . '/';
     $upload_file = $upload_dir . basename($_FILES['preview']['name']);
 
-    return move_uploaded_file($_FILES['preview']['tmp_name'], $upload_file);
+    $is_moved = move_uploaded_file($_FILES['preview']['tmp_name'], $upload_file);
+    if (!$is_moved) {
+        return false;
+    }
+
+    $data = ['path_to_file' => $upload_file];
+    $where = ['code' => $task_code];
+
+    $conn_id = db_connection($database_name = 'doingsdone');
+
+    return db_update($conn_id, 'tasks', $data, $where);
 }
 
 function validation_task()
@@ -247,7 +345,7 @@ function is_attached_file()
     return (isset($_FILES['preview']) and $_FILES['preview']['name']);
 }
 
-function authentication(array $users)
+function authentication()
 {
     session_start();
 
@@ -257,7 +355,7 @@ function authentication(array $users)
         return [];
     }
 
-    $user = get_user_by_email($users, $_SESSION['email']);
+    $user = get_user_by_email($_SESSION['email']);
 
     if ($user and ($user['password'] == $_SESSION['password'])) {
         return $user;
@@ -268,9 +366,9 @@ function authentication(array $users)
     return [];
 }
 
-function create_session(array $users)
+function create_session()
 {
-    $user = get_user_by_email($users, $_POST['email']);
+    $user = get_user_by_email($_POST['email']);
 
     session_start();
 
@@ -280,7 +378,7 @@ function create_session(array $users)
     return $user;
 }
 
-function validation_login(array $users)
+function validation_login()
 {
     $errors = [];
 
@@ -294,7 +392,7 @@ function validation_login(array $users)
         return $errors;
     }
 
-    $user = get_user_by_email($users, $_POST['email']);
+    $user = get_user_by_email($_POST['email']);
     if (!$user) {
         $errors['email'] = 'Пользователя с указанным email-ом не существует';
     } elseif (!password_verify($_POST['password'], $user['password'])) {
@@ -304,15 +402,71 @@ function validation_login(array $users)
     return $errors;
 }
 
-function get_user_by_email(array $users, string $email)
+function validation_register()
 {
-    foreach ($users as $user) {
-        if ($user['email'] == $email) {
-            return $user;
-        }
+    $errors = [];
+
+    if (!isset($_POST['email']) or !$_POST['email']) {
+        $errors['email'] = 'Не указан email';
+    }
+    if (!isset($_POST['password']) or !$_POST['password']) {
+        $errors['password'] = 'Не указан пароль';
+    }
+    if (!isset($_POST['name']) or !$_POST['name']) {
+        $errors['name'] = 'Не указано имя';
+    }
+    if ($errors) {
+        return $errors;
+    }
+
+    $user = get_user_by_email($_POST['email']);
+    if ($user) {
+        $errors['email'] = 'Пользователя с указанным email-ом уже существует';
+    }
+
+    return $errors;
+}
+
+function add_user()
+{
+    $data = [
+        'name'              => $_POST['name'],
+        'email'             => $_POST['email'],
+        'password'          => password_hash($_POST['password'], PASSWORD_DEFAULT),
+        'date_registration' => date('Y-m-d H:i:s', time()),
+    ];
+
+    $fields = create_fields_for_insert(array_keys($data));
+    $placeholders = create_placeholders_for_insert(count($data));
+
+    $conn_id = db_connection($database_name = 'doingsdone');
+
+    if ($user_code = db_insert($conn_id, "INSERT INTO users ({$fields}) VALUES ({$placeholders});", $data)) {
+        $data['code'] = $user_code;
+
+        return $data;
     }
 
     return [];
+}
+
+function get_users_by_where(array $where_placeholder = [], array $where_data = [])
+{
+    $where_placeholder = ($where_placeholder ? 'WHERE ' . implode(' AND ', $where_placeholder) : '');
+
+    $conn_id = db_connection($database_name = 'doingsdone');
+
+    return db_query($conn_id, "SELECT * FROM users {$where_placeholder};", $where_data);
+}
+
+function get_user_by_email(string $email)
+{
+    $where_placeholder[] = '(email = ?)';
+    $where_data[] = $email;
+
+    $data = get_users_by_where($where_placeholder, $where_data);
+
+    return ($data ? $data[0] : []);
 }
 
 function is_show_completed_tasks()
@@ -348,15 +502,15 @@ function set_show_completed_tasks()
         ]); ?>
 
         <?php if ($current_user): ?>
-            <?php $tasks_by_project = (is_show_completed_tasks() ? get_tasks_by_project_code($tasks, $current_project_code) : get_active_tasks_by_project_code($tasks, $current_project_code)); ?>
+            <?php $tasks_by_project = (is_show_completed_tasks() ? get_user_tasks_by_project($current_user['code'], $current_project_code) : get_active_user_tasks_by_project($current_user['code'], $current_project_code)); ?>
             <?= include_template('templates/main.php', [
-                'projects'                        => $projects,
-                'all_tasks'                       => $tasks,
-                'current_project_code'            => $current_project_code,
-                'get_tasks_count_by_project_code' => $get_tasks_count_by_project_code,
-                'tasks'                           => formatter_tasks_for_display($tasks_by_project, $current_ts),
-                'is_show_completed_tasks'         => is_show_completed_tasks(),
+                'projects'                => formatter_projects_for_display($current_user['code'], get_projects_by_user($current_user['code'])),
+                'current_project_code'    => $current_project_code,
+                'tasks'                   => formatter_tasks_for_display($tasks_by_project),
+                'is_show_completed_tasks' => is_show_completed_tasks(),
             ]); ?>
+        <?php elseif ($open_register_form): ?>
+            <?= include_template('templates/register.php', ['errors' => $register_errors]); ?>
         <?php else: ?>
             <?= include_template('templates/guest.php'); ?>
         <?php endif; ?>
@@ -369,8 +523,7 @@ function set_show_completed_tasks()
 
 <?php if ($open_add_task_form): ?>
     <?= include_template('templates/task_addition_form.php', [
-        'P_ALL'    => P_ALL,
-        'projects' => $projects,
+        'projects' => get_projects_by_user($current_user['code']),
         'fields'   => $_POST,
         'errors'   => $errors_in_new_task,
     ]); ?>
