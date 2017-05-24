@@ -24,7 +24,7 @@ class Authentication
     private $currentUser = [];
 
     /**
-     * @param /Factory $factory
+     * @param \Factory\Factory $factory
      */
     public function __construct($factory)
     {

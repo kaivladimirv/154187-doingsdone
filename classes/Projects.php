@@ -19,7 +19,7 @@ class Projects
     const ALL_PROJECTS_CODE = 0;
 
     /**
-     * @var /Factory
+     * @var \Factory\Factory
      */
     private $_factory;
 
@@ -29,7 +29,7 @@ class Projects
     private $tasks;
 
     /**
-     * @param /Factory $factory
+     * @param \Factory\Factory $factory
      */
     public function __construct($factory)
     {

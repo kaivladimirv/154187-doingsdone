@@ -12,12 +12,12 @@ namespace Users;
 class Users
 {
     /**
-     * @var /Factory
+     * @var \Factory\Factory
      */
     private $_factory;
 
     /**
-     * @param /Factory $factory
+     * @param \Factory\Factory $factory
      */
     public function __construct($factory)
     {
