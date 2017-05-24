@@ -2,7 +2,6 @@
 
 namespace Projects;
 
-use Database\Database;
 use Tasks\Tasks;
 
 /**
@@ -20,20 +19,22 @@ class Projects
     const ALL_PROJECTS_CODE = 0;
 
     /**
-     * @var Database Содержит объект для работы с базой данных
+     * @var /Factory
      */
-    private $db;
+    private $_factory;
 
     /**
      * @var Tasks Содержит объект для работы со списком задач
      */
     private $tasks;
 
-    public function __construct()
+    /**
+     * @param /Factory $factory
+     */
+    public function __construct($factory)
     {
-        $this->db = new Database();
-        $this->tasks = new Tasks();
-
+        $this->_factory = $factory;
+        $this->tasks = new Tasks($factory);
     }
 
     /**
@@ -144,8 +145,6 @@ class Projects
           JOIN tasks on projects.code = tasks.project_code
           {$wherePlaceholders};";
 
-        $this->db->connection($databaseName = 'doingsdone');
-
-        return $this->db->query($sql, $whereData);
+        return $this->_factory->db->query($sql, $whereData);
     }
 }

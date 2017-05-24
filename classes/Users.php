@@ -2,8 +2,6 @@
 
 namespace Users;
 
-use Database\Database;
-
 /**
  * Класс для работы со списком пользователей
  *
@@ -14,13 +12,16 @@ use Database\Database;
 class Users
 {
     /**
-     * @var Database Содержит объект для работы с базой данных
+     * @var /Factory
      */
-    private $db;
+    private $_factory;
 
-    public function __construct()
+    /**
+     * @param /Factory $factory
+     */
+    public function __construct($factory)
     {
-        $this->db = new Database();
+        $this->_factory = $factory;
     }
 
     /**
@@ -106,12 +107,10 @@ class Users
     private function appendToDb(array $newUser)
     {
 
-        $fields = $this->db->createFieldsForInsert(array_keys($newUser));
-        $placeholders = $this->db->createPlaceholdersForInsert(count($newUser));
+        $fields = $this->_factory->db->createFieldsForInsert(array_keys($newUser));
+        $placeholders = $this->_factory->db->createPlaceholdersForInsert(count($newUser));
 
-        $this->db->connection($database_name = 'doingsdone');
-
-        return $this->db->insert("INSERT INTO users ({$fields}) VALUES ({$placeholders});", $newUser);
+        return $this->_factory->db->insert("INSERT INTO users ({$fields}) VALUES ({$placeholders});", $newUser);
     }
 
     /**
@@ -126,8 +125,6 @@ class Users
     {
         $wherePlaceholders = ($wherePlaceholders ? 'WHERE ' . implode(' AND ', $wherePlaceholders) : '');
 
-        $this->db->connection($databaseName = 'doingsdone');
-
-        return $this->db->query("SELECT * FROM users {$wherePlaceholders};", $whereData);
+        return $this->_factory->db->query("SELECT * FROM users {$wherePlaceholders};", $whereData);
     }
 }

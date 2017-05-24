@@ -23,9 +23,12 @@ class Authentication
      */
     private $currentUser = [];
 
-    public function __construct()
+    /**
+     * @param /Factory $factory
+     */
+    public function __construct($factory)
     {
-        $this->users = new Users();
+        $this->users = new Users($factory);
     }
 
     /**

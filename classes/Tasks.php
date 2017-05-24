@@ -2,7 +2,6 @@
 
 namespace Tasks;
 
-use Database\Database;
 use Projects\Projects;
 
 /**
@@ -15,13 +14,16 @@ use Projects\Projects;
 class Tasks
 {
     /**
-     * @var Database Содержит объект для работы с базой данных
+     * @var /Factory
      */
-    private $db;
+    private $_factory;
 
-    public function __construct()
+    /**
+     * @param /Factory $factory
+     */
+    public function __construct($factory)
     {
-        $this->db = new Database();
+        $this->_factory = $factory;
     }
 
     /**
@@ -154,9 +156,7 @@ class Tasks
         ];
         $where = ['code' => $taskCode];
 
-        $this->db->connection($database_name = 'doingsdone');
-
-        return ($this->db->update('tasks', $data, $where) !== false);
+        return ($this->_factory->db->update('tasks', $data, $where) !== false);
     }
 
     /**
@@ -168,12 +168,10 @@ class Tasks
      */
     private function appendToDb(array $newTask)
     {
-        $fields = $this->db->createFieldsForInsert(array_keys($newTask));
-        $placeholders = $this->db->createPlaceholdersForInsert(count($newTask));
+        $fields = $this->_factory->db->createFieldsForInsert(array_keys($newTask));
+        $placeholders = $this->_factory->db->createPlaceholdersForInsert(count($newTask));
 
-        $this->db->connection($database_name = 'doingsdone');
-
-        return $this->db->insert("INSERT INTO tasks ({$fields}) VALUES ({$placeholders});", $newTask);
+        return $this->_factory->db->insert("INSERT INTO tasks ({$fields}) VALUES ({$placeholders});", $newTask);
     }
 
     /**
@@ -200,9 +198,7 @@ class Tasks
         $data = ['path_to_file' => $uploadFileName];
         $where = ['code' => $taskCode];
 
-        $this->db->connection($database_name = 'doingsdone');
-
-        return ($this->db->update('tasks', $data, $where) !== false);
+        return ($this->_factory->db->update('tasks', $data, $where) !== false);
     }
 
     /**
@@ -302,9 +298,7 @@ class Tasks
 
         $sql = "SELECT * FROM tasks {$wherePlaceholders};";
 
-        $this->db->connection($database_name = 'doingsdone');
-
-        return $this->db->query($sql, $whereData);
+        return $this->_factory->db->query($sql, $whereData);
     }
 
     /**
@@ -321,8 +315,7 @@ class Tasks
 
         $sql = "SELECT COUNT(*) AS tasks_count FROM tasks {$wherePlaceholders};";
 
-        $this->db->connection($database_name = 'doingsdone');
-        $data = $this->db->query($sql, $whereData);
+        $data = $this->_factory->db->query($sql, $whereData);
 
         return ($data ? $data[0]['tasks_count'] : 0);
     }
