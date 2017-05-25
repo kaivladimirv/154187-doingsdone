@@ -6,7 +6,7 @@
             <p>Веб-приложение для удобного ведения списка дел.</p>
         </div>
 
-        <?php if ($data['current_user']): ?>
+        <?php if ($data['currentUser']): ?>
             <a class="main-footer__button button button--plus" href="/index.php?add">Добавить задачу</a>
         <?php endif; ?>
 

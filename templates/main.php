@@ -5,7 +5,7 @@
         <nav class="main-navigation">
             <ul class="main-navigation__list">
                 <?php foreach ($data['projects'] as $project): ?>
-                    <li class="main-navigation__list-item <?= ($data['current_project_code'] == $project['code'] ? 'main-navigation__list-item--active' : ''); ?>">
+                    <li class="main-navigation__list-item <?= ($data['currentProjectCode'] == $project['code'] ? 'main-navigation__list-item--active' : ''); ?>">
                         <a class="main-navigation__list-item-link"
                            href="/index.php?project=<?= $project['code']; ?>"><?= $project['name']; ?></a>
                         <span class="main-navigation__list-item-count"><?= $project['tasks_count']; ?></span>
@@ -36,7 +36,7 @@
 
             <label class="checkbox">
                 <input id="show-complete-tasks" class="checkbox__input visually-hidden"
-                       type="checkbox" <?= ($data['is_show_completed_tasks'] ? 'checked' : ''); ?> >
+                       type="checkbox" <?= ($data['isShowCompletedTasks'] ? 'checked' : ''); ?> >
                 <span class="checkbox__text">Показывать выполненные</span>
             </label>
         </div>

@@ -72,6 +72,16 @@ class Authentication
     }
 
     /**
+     * Выполнять регистрацию нового пользователя
+     *
+     * @return boolean|array Возвращает true - в случаи успеха или массив содержащий ошибки
+     */
+    public function registration()
+    {
+        return $this->users->append();
+    }
+
+    /**
      * Разлогинивает текущего пользователя
      *
      */

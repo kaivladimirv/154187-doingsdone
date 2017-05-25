@@ -1,4 +1,4 @@
-<div class="modal" <?= ($data['open_login_form'] ? '' : 'hidden'); ?>>
+<div class="modal" <?= ($data['openLoginForm'] ? '' : 'hidden'); ?>>
     <button class="modal__close" type="button" name="button">Закрыть</button>
 
     <h2 class="modal__heading">
