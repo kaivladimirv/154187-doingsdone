@@ -7,6 +7,8 @@ use Authentication\Authentication;
 use Users\Users;
 use Projects\Projects;
 use Tasks\Tasks;
+use Request\Request;
+use TemplateEngine\TemplateEngine;
 
 /**
  * @author  Каймонов Владимир
@@ -17,6 +19,8 @@ use Tasks\Tasks;
  * @property-read Users          $users
  * @property-read Projects       $projects
  * @property-read Tasks          $tasks
+ * @property-read Request        $request
+ * @property-read TemplateEngine $templ
  */
 class Factory
 {
@@ -46,6 +50,16 @@ class Factory
     private $_tasks;
 
     /**
+     * @var Request Содержит объект для обработки HTTP-запросов
+     */
+    private $_request;
+
+    /**
+     * @var TemplateEngine Содержит объект для работы с шаблонами
+     */
+    private $_templ;
+
+    /**
      * Возвращает значение указанного свойства
      *
      * @param string $name Название свойства
@@ -69,6 +83,12 @@ class Factory
 
             case 'tasks':
                 return $this->initTasks();
+
+            case 'request':
+                return $this->initRequest();
+
+            case 'templ':
+                return $this->initTemplateEngine();
 
         }
 
@@ -144,6 +164,34 @@ class Factory
         }
 
         return $this->_tasks;
+    }
+
+    /**
+     * Инициализирует и возвращает объект для обработки HTTP-запросов
+     *
+     * @return mixed
+     */
+    private function initRequest()
+    {
+        if ($this->_request === null) {
+            $this->_request = new Request($this);
+        }
+
+        return $this->_request;
+    }
+
+    /**
+     * Инициализирует и возвращает объект для работы с шаблонами
+     *
+     * @return mixed
+     */
+    private function initTemplateEngine()
+    {
+        if ($this->_templ === null) {
+            $this->_templ = new TemplateEngine($this);
+        }
+
+        return $this->_templ;
     }
 
 }

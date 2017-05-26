@@ -1,6 +1,5 @@
 <?php
 require_once 'autoload.php';
-require_once 'functions.php';
 
 use Factory\Factory;
 
@@ -12,7 +11,7 @@ $currentUser = [];
 
 if ($factory->auth->isAuthenticated()) {
     $currentUser = $factory->auth->getCurrentUser();
-} elseif (isRequestLogin()) {
+} elseif ($factory->request->isRequestLogin()) {
     $loginErrors = $factory->auth->authenticate();
     if (!is_array($loginErrors)) {
         header('Location: /');
@@ -20,7 +19,7 @@ if ($factory->auth->isAuthenticated()) {
     }
 }
 
-if (!$currentUser and isRequestRegister()) {
+if (!$currentUser and $factory->request->isRequestRegister()) {
     $registerErrors = $factory->auth->registration();
     if (!is_array($registerErrors)) {
         header('Location: /index.php?login_form=&is_registered');
@@ -28,10 +27,10 @@ if (!$currentUser and isRequestRegister()) {
     }
 }
 
-$openLoginForm = (isRequestForOpenLoginForm() or $loginErrors);
-$openRegisterForm = (!$currentUser and (isRequestForOpenRegisterForm() or $registerErrors));
+$openLoginForm = ($factory->request->isRequestForOpenLoginForm() or $loginErrors);
+$openRegisterForm = (!$currentUser and ($factory->request->isRequestForOpenRegisterForm() or $registerErrors));
 
-if ($currentUser and isRequestForShowCompletedTasks()) {
+if ($currentUser and $factory->request->isRequestForShowCompletedTasks()) {
     setShowCompletedTasks();
     header('Location: /');
     exit;
@@ -44,7 +43,7 @@ if ($currentUser and !$factory->projects->isExists($currentUser['code'], $curren
 }
 
 $errorsInNewTask = [];
-if (isRequestForAddTask()) {
+if ($factory->request->isRequestForAddTask()) {
     $errorsInNewTask = $factory->tasks->append($currentUser['code']);
     if (!is_array($errorsInNewTask)) {
         header('Location: /');
@@ -52,55 +51,15 @@ if (isRequestForAddTask()) {
     }
 }
 
-$openAddTaskForm = (isRequestForOpenAddTaskForm() or $errorsInNewTask);
+$openAddTaskForm = ($factory->request->isRequestForOpenAddTaskForm() or $errorsInNewTask);
 
-if ($currentUser and isRequestForCompleteTask()) {
+if ($currentUser and $factory->request->isRequestForCompleteTask()) {
     $factory->tasks->complete(getCompleteTaskCode());
 }
 
 function getCurrentProjectCode(\Projects\Projects $projects)
 {
     return (isset($_GET['project']) ? (int) $_GET['project'] : $projects::ALL_PROJECTS_CODE);
-}
-
-function isRequestForOpenAddTaskForm()
-{
-    return isset($_GET['add']);
-}
-
-function isRequestForAddTask()
-{
-    return isset($_POST['project']);
-}
-
-function isRequestForOpenLoginForm()
-{
-    return isset($_GET['login_form']);
-}
-
-function isRequestLogin()
-{
-    return isset($_GET['login']);
-}
-
-function isRequestForOpenRegisterForm()
-{
-    return isset($_GET['register_form']);
-}
-
-function isRequestRegister()
-{
-    return isset($_GET['register']);
-}
-
-function isRequestForShowCompletedTasks()
-{
-    return isset($_GET['show_completed']);
-}
-
-function isRequestForCompleteTask()
-{
-    return (isset($_GET['complete_task']) and is_numeric($_GET['complete_task']));
 }
 
 function getCompleteTaskCode()
@@ -136,39 +95,39 @@ function setShowCompletedTasks()
 
 <div class="page-wrapper">
     <div class="container container--with-sidebar">
-        <?= includeTemplate('templates/header.php', [
+        <?= $factory->templ->includeTemplate('templates/header.php', [
             'currentUser' => $currentUser,
         ]); ?>
 
         <?php if ($currentUser): ?>
             <?php $tasksByProject = (isShowCompletedTasks() ? $factory->tasks->getListByProject($currentUser['code'], $currentProjectCode) : $factory->tasks->getListOfActiveByProject($currentUser['code'], $currentProjectCode)); ?>
-            <?= includeTemplate('templates/main.php', [
+            <?= $factory->templ->includeTemplate('templates/main.php', [
                 'projects'             => $factory->projects->formatterForDisplay($currentUser['code'], $factory->projects->getListByUser($currentUser['code'])),
                 'currentProjectCode'   => $currentProjectCode,
                 'tasks'                => $factory->tasks->formatterForDisplay($tasksByProject),
                 'isShowCompletedTasks' => isShowCompletedTasks(),
             ]); ?>
         <?php elseif ($openRegisterForm): ?>
-            <?= includeTemplate('templates/register.php', ['errors' => $registerErrors]); ?>
+            <?= $factory->templ->includeTemplate('templates/register.php', ['errors' => $registerErrors]); ?>
         <?php else: ?>
-            <?= includeTemplate('templates/guest.php'); ?>
+            <?= $factory->templ->includeTemplate('templates/guest.php'); ?>
         <?php endif; ?>
     </div>
 </div>
 
-<?= includeTemplate('templates/footer.php', [
+<?= $factory->templ->includeTemplate('templates/footer.php', [
     'currentUser' => $currentUser,
 ]); ?>
 
 <?php if ($openAddTaskForm): ?>
-    <?= includeTemplate('templates/task_addition_form.php', [
+    <?= $factory->templ->includeTemplate('templates/task_addition_form.php', [
         'projects' => $factory->projects->getListByUser($currentUser['code']),
         'fields'   => $_POST,
         'errors'   => $errorsInNewTask,
     ]); ?>
 <?php endif; ?>
 
-<?= includeTemplate('templates/login.php', [
+<?= $factory->templ->includeTemplate('templates/login.php', [
     'openLoginForm' => $openLoginForm,
     'errors'        => $loginErrors,
 ]); ?>
