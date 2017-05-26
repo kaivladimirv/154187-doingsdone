@@ -2,8 +2,6 @@
 
 namespace Authentication;
 
-use Users\Users;
-
 /**
  * Класс для управления аутентификацией пользователя
  *
@@ -14,9 +12,9 @@ use Users\Users;
 class Authentication
 {
     /**
-     * @var Users Содержит объект для работы со списком пользователей
+     * @var \Factory\Factory
      */
-    private $users;
+    private $_factory;
 
     /**
      * @var array Содержит данные о текущем пользователе
@@ -28,7 +26,7 @@ class Authentication
      */
     public function __construct($factory)
     {
-        $this->users = new Users($factory);
+        $this->_factory = $factory;
     }
 
     /**
@@ -46,7 +44,7 @@ class Authentication
             return false;
         }
 
-        $this->currentUser = $this->users->getDataByEmail($_SESSION['email']);
+        $this->currentUser = $this->_factory->users->getDataByEmail($_SESSION['email']);
         if ($this->currentUser and ($this->currentUser['password'] == $_SESSION['password'])) {
             return true;
         }
@@ -78,7 +76,7 @@ class Authentication
      */
     public function registration()
     {
-        return $this->users->append();
+        return $this->_factory->users->append();
     }
 
     /**
@@ -122,7 +120,7 @@ class Authentication
             return $errors;
         }
 
-        $user = $this->users->getDataByEmail($_POST['email']);
+        $user = $this->_factory->users->getDataByEmail($_POST['email']);
         if (!$user) {
             $errors['email'] = 'Пользователя с указанным email-ом не существует';
         } elseif (!password_verify($_POST['password'], $user['password'])) {
@@ -139,7 +137,7 @@ class Authentication
      */
     private function createSession()
     {
-        $this->currentUser = $this->users->getDataByEmail($_POST['email']);
+        $this->currentUser = $this->_factory->users->getDataByEmail($_POST['email']);
 
         session_start();
 

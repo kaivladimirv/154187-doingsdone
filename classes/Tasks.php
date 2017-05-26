@@ -2,8 +2,6 @@
 
 namespace Tasks;
 
-use Projects\Projects;
-
 /**
  * Класс для работы со списком задач
  *
@@ -265,7 +263,7 @@ class Tasks
      */
     private function setWhereProjectCode(array &$wherePlaceholders, array &$whereData, int $projectCode)
     {
-        if ($projectCode != Projects::ALL_PROJECTS_CODE) {
+        if ($projectCode != $this->_factory->projects::ALL_PROJECTS_CODE) {
             $wherePlaceholders[] = '(project_code = ?)';
             $whereData[] = $projectCode;
         }
