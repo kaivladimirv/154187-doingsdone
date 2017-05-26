@@ -1,19 +1,11 @@
 <?php
+require_once 'autoload.php';
+require_once 'functions.php';
 
 use Factory\Factory;
 use Authentication\Authentication;
 use Projects\Projects;
 use Tasks\Tasks;
-
-require_once 'mysql_helper.php';
-require_once 'functions.php';
-
-require_once 'classes/Database.php';
-require_once 'classes/Factory.php';
-require_once 'classes/Users.php';
-require_once 'classes/Authentication.php';
-require_once 'classes/Projects.php';
-require_once 'classes/Tasks.php';
 
 $factory = new Factory();
 $auth = new Authentication($factory);
