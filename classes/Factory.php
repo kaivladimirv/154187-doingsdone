@@ -31,7 +31,7 @@ class Factory
             case 'db':
                 if ($this->_database === null) {
                     $this->_database = new Database();
-                    $this->_database->connection($databaseName = 'doingsdone');
+                    $this->_database->connection();
                 }
 
                 return $this->_database;
