@@ -2,8 +2,6 @@
 
 namespace Projects;
 
-use Tasks\Tasks;
-
 /**
  * Класс для работы со список проектов
  *
@@ -24,17 +22,11 @@ class Projects
     private $_factory;
 
     /**
-     * @var Tasks Содержит объект для работы со списком задач
-     */
-    private $tasks;
-
-    /**
      * @param \Factory\Factory $factory
      */
     public function __construct($factory)
     {
         $this->_factory = $factory;
-        $this->tasks = new Tasks($factory);
     }
 
     /**
@@ -93,7 +85,7 @@ class Projects
         ]);
 
         return array_map(function ($project) use ($userCode) {
-            $project['tasks_count'] = $this->tasks->getCountByProject($userCode, $project['code']);
+            $project['tasks_count'] = $this->_factory->tasks->getCountByProject($userCode, $project['code']);
 
             return $project;
         }, $projects);

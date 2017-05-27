@@ -17,6 +17,11 @@ class Database
     private $host;
 
     /**
+     * @var string Название базы данных
+     */
+    private $databaseName;
+
+    /**
      * @var string Имя пользователя для подключения к хосту
      */
     private $user;
@@ -39,13 +44,11 @@ class Database
     /**
      * Производит подключение к указанной базе данных
      *
-     * @param string $databaseName Название базы данных
-     *
      * @return boolean
      */
-    public function connection(string $databaseName)
+    public function connection()
     {
-        $this->connId = mysqli_connect($this->host, $this->user, $this->password, $databaseName);
+        $this->connId = mysqli_connect($this->host, $this->user, $this->password, $this->databaseName);
 
         return $this->isConnected();
     }
@@ -276,6 +279,7 @@ class Database
         }
 
         $this->host = $params['host'];
+        $this->databaseName = $params['database_name'];
         $this->user = $params['user'];
         $this->password = $params['password'];
     }

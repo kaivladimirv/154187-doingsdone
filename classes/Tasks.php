@@ -2,8 +2,6 @@
 
 namespace Tasks;
 
-use Projects\Projects;
-
 /**
  * Класс для работы со списком задач
  *
@@ -100,7 +98,7 @@ class Tasks
             if ($task['is_done']) {
                 $task['class_names'][] = 'task--completed';
             } elseif ($task['date_deadline']) {
-                $days_until_deadline = $this->getDaysBetween(strtotime($task['date_deadline']), $currentTime);
+                $days_until_deadline = $this->getDaysBetween($currentTime, strtotime($task['date_deadline']));
                 $task['class_names'][] = ($days_until_deadline <= 0 ? 'task--important' : '');
             }
 
@@ -187,7 +185,7 @@ class Tasks
             return true;
         }
 
-        $uploadDir = __DIR__ . '/';
+        $uploadDir = $_SERVER['DOCUMENT_ROOT'] . '/';
         $uploadFileName = $uploadDir . basename($_FILES['preview']['name']);
 
         $isMoved = move_uploaded_file($_FILES['preview']['tmp_name'], $uploadFileName);
@@ -225,7 +223,7 @@ class Tasks
             }
         }
 
-        if (is_attached_file()) {
+        if ($this->isAttachedFile()) {
             if ($_FILES['preview']['error'] != UPLOAD_ERR_OK) {
                 $errors['preview'] = 'Произошла ошибка при загрузке файла';
             } elseif (!is_uploaded_file($_FILES['preview']['tmp_name'])) {
@@ -265,7 +263,7 @@ class Tasks
      */
     private function setWhereProjectCode(array &$wherePlaceholders, array &$whereData, int $projectCode)
     {
-        if ($projectCode != Projects::ALL_PROJECTS_CODE) {
+        if ($projectCode != $this->_factory->projects::ALL_PROJECTS_CODE) {
             $wherePlaceholders[] = '(project_code = ?)';
             $whereData[] = $projectCode;
         }
@@ -330,7 +328,7 @@ class Tasks
      */
     private function getDaysBetween(int $start, int $end)
     {
-        return $this->convertTimestampToDays($end) - ($this->convertTimestampToDays($start) + 1);
+        return ($this->convertTimestampToDays($end) - ($this->convertTimestampToDays($start) + 1));
     }
 
     /**

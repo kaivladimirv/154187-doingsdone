@@ -4,7 +4,7 @@
     </a>
 
     <div class="main-header__side">
-        <?php if ($data['current_user']): ?>
+        <?php if ($data['currentUser']): ?>
             <a class="main-header__side-item button button--plus" href="/index.php?add">Добавить задачу</a>
 
             <div class="main-header__side-item user-menu">
@@ -13,7 +13,7 @@
                 </div>
 
                 <div class="user-menu__data">
-                    <p><?= ($data['current_user'] ? $data['current_user']['name'] : ''); ?></p>
+                    <p><?= ($data['currentUser'] ? $data['currentUser']['name'] : ''); ?></p>
 
                     <a href="/logout.php">Выйти</a>
                 </div>

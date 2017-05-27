@@ -42,11 +42,11 @@ class Users
     }
 
     /**
-     * Производит регистрацию нового пользователя
+     * Производит добавление нового пользователя
      *
      * @return boolean|array Возвращает true в случаи успеха или массив содержащий список ошибок
      */
-    public function registration()
+    public function append()
     {
         if ($errors = $this->validationAppend()) {
             return $errors;
@@ -61,7 +61,7 @@ class Users
 
         $userCode = $this->appendToDb($newUser);
         if (!$userCode) {
-            return $errors = ['name' => 'Не удалось произвести регистрацию'];
+            return $errors = ['name' => 'Не удалось произвести добавление нового пользователя'];
         }
 
         return true;
