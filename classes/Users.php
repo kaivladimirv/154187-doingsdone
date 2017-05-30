@@ -78,7 +78,10 @@ class Users
 
         if (!isset($_POST['email']) or !$_POST['email']) {
             $errors['email'] = 'Не указан email';
+        } elseif (!filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) {
+            $errors['email'] = 'Некорректно указан email';
         }
+
         if (!isset($_POST['password']) or !$_POST['password']) {
             $errors['password'] = 'Не указан пароль';
         }
