@@ -18,14 +18,49 @@ class App
      */
     private static $_factory;
 
-    private static $registerErrors       = [];
-    private static $loginErrors          = [];
-    private static $currentUser          = [];
-    private static $openLoginForm        = false;
-    private static $openRegisterForm     = false;
-    private static $currentProjectCode   = null;
-    private static $errorsInNewTask      = [];
-    private static $openAddTaskForm      = false;
+    /**
+     * @var array Список ошибок произошедших при регистрации
+     */
+    private static $registerErrors = [];
+
+    /**
+     * @var array Список ошибок произошедших при аутентификации
+     */
+    private static $loginErrors = [];
+
+    /**
+     * @var array Содержит данные о текущем пользователе
+     */
+    private static $currentUser = [];
+
+    /**
+     * @var boolean Указывает требуется или нет открыть форму аутентификации
+     */
+    private static $openLoginForm = false;
+
+    /**
+     * @var boolean Указывает требуется или нет открыть форму регистрации
+     */
+    private static $openRegisterForm = false;
+
+    /**
+     * @var integer Содержит код текущего проекта
+     */
+    private static $currentProjectCode = null;
+
+    /**
+     * @var array Список ошибок произошедших при добавлении новой задачи
+     */
+    private static $errorsInNewTask = [];
+
+    /**
+     * @var boolean Указывает требуется или нет открыть форму добавление новой задачи
+     */
+    private static $openAddTaskForm = false;
+
+    /**
+     * @var boolean Указывает нужно или нет отобразить завершенные задачи
+     */
     private static $isShowCompletedTasks = false;
 
     public function __construct()
