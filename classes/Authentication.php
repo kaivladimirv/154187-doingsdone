@@ -45,7 +45,7 @@ class Authentication
         }
 
         $this->currentUser = $this->_factory->users->getDataByEmail($_SESSION['email']);
-        if ($this->currentUser and ($this->currentUser['password'] == $_SESSION['password'])) {
+        if ($this->currentUser and ($this->currentUser['password'] === $_SESSION['password'])) {
             return true;
         }
         $this->currentUser = [];

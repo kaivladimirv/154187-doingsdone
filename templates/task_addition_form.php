@@ -27,7 +27,7 @@
                 <option value=""></option>
                 <?php foreach ($data['projects'] as $project): ?>
                     <option value="<?= $project['code']; ?>"
-                        <?= ((isset($data['fields']['project']) and $data['fields']['project'] == $project['code']) ? 'selected' : ''); ?>><?= $project['name']; ?></option>
+                        <?= ((isset($data['fields']['project']) and $data['fields']['project'] === $project['code']) ? 'selected' : ''); ?>><?= $project['name']; ?></option>
                 <?php endforeach; ?>
             </select>
 

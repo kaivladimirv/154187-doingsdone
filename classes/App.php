@@ -270,7 +270,7 @@ class App
      */
     private static function detectWhetherShowCompletedTasks()
     {
-        self::$isShowCompletedTasks = (isset($_COOKIE['show_completed']) and ($_COOKIE['show_completed'] == 1));
+        self::$isShowCompletedTasks = (isset($_COOKIE['show_completed']) and ((int) $_COOKIE['show_completed'] === 1));
     }
 
     /**

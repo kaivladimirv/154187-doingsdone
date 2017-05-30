@@ -55,7 +55,7 @@ class Projects
      */
     public function isExists(int $userCode, int $projectCode)
     {
-        if ($projectCode == self::ALL_PROJECTS_CODE) {
+        if ($projectCode === self::ALL_PROJECTS_CODE) {
             return true;
         }
 
